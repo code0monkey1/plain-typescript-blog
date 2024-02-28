@@ -19,7 +19,6 @@ const deletePostById =async(req:Request,res:Response,next:NextFunction)=>{
 
 }
 
-
 const patchPostById = async(req:Request,res:Response,next:NextFunction)=>{
       
       await postServices.patch(req.params.id,req.body)
@@ -28,13 +27,11 @@ const patchPostById = async(req:Request,res:Response,next:NextFunction)=>{
 }
 
 
-
 const getPostById=async(req:Request,res:Response,next:NextFunction)=>{
 
 
       const post = await postServices.getOne(req.params.id)
 
-      console.log("The post retrieved is",post&&JSON.stringify(post,null,2))
 
       if(!post) return res.status(404).end()
 

@@ -3,8 +3,6 @@
 ### Requirements:
 
 
-
-
 #### Auth routes : 
 
 1.[-] router.post('/login', expressRouteAdapter(makeSignInController()));

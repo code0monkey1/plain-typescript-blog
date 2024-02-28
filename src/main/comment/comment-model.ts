@@ -2,10 +2,6 @@ import { Schema, model } from 'mongoose';
 
 
 const commentSchema = new Schema({
-    id: {
-        type: String,
-        required: false
-    },
     postId: {
         type: Schema.Types.ObjectId,
         ref: 'Post',
@@ -15,8 +11,19 @@ const commentSchema = new Schema({
         type: String,
         required: true
     }
+},{
+  timestamps:true
 });
 
-const Comment = model('Comment', commentSchema);
+commentSchema.set('toJSON', {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
+    // the passwordHash should not be revealed
+    delete returnedObject.password
+  }
+})
 
-export default Comment;
+
+export default model('Comment', commentSchema);

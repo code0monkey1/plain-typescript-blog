@@ -1,25 +1,37 @@
 
 // posts collection
+import { posts } from "../post/post-service"
 import { Post } from "../post/post-types"
 import { Comment } from "./comment-types"
 
 let id = 0
 
-let comments =[] as Comment[]
+export let comments =[] as Comment[]
 
 const db={
 
   create:async(comment:Omit<Comment,'id'>):Promise<Comment>=>{
     
-    id+=1
-       
-    const newComment :Comment ={id:id+'',...comment }
-
+  
    // Simulate a delay of 1 second before pushing the new post
     return await new Promise(resolve => {
-        setTimeout(() => {
-            comments.push(newComment);
-            resolve(newComment);
+        
+      setTimeout(() => {
+             id+=1
+            
+            const newComment :Comment  ={id:id+'',...comment}
+
+            comments.push(newComment )
+
+            // also insert it in the posts comments array 
+            const postId = comment.postId
+            
+            const post = posts.find( p=> p.id==postId)
+
+            post?.comments.push(newComment.id)
+              
+             resolve(newComment)
+
         }, 1000); // 1 seconds delay
     });
 
@@ -32,19 +44,27 @@ const db={
         
         setTimeout(() => {
 
-             const  deletedPostCommentsIds = posts.find( p=> p.id===id)!.comments
-      
-              //delete the post
-              posts = posts.filter( p => p.id!==id )
+                  
+            const {postId} = comments.find( c => c.id==id)!
+            
+            comments = comments.filter( c => c.id!==id)
 
-              // you need to delete the associated comments too
-              const filteredComments = comments.filter( c =>  !deletedPostCommentsIds.some( d => c.id==d))
+            // also delete it from the post : comments array
+        
+            const post= (posts.find( p=> p.id==postId)) as Post
 
-              comments.length=0
-              
-            //populate filtered comments
-            filteredComments.forEach( c => comments.push(c))
+            const filteredComments = post.comments.filter( c => c!==id )
+
+        
+            const mutatedPosts :Post []= posts.map( p=> p.id==postId? {...p,comments:filteredComments}:p)
+            
+            //clear all posts
+            posts.length=0
+
+            mutatedPosts.forEach( p => posts.push(p))
+
             resolve()
+
         }, 1000); // 1 seconds delay
     });
     
@@ -55,37 +75,37 @@ const db={
 
        return await new Promise(resolve => {
         setTimeout(() => {
-            posts = posts.map( p => id==p.id?{...p,...body}:p)
+            comments = comments.map( c => id==c.id?{...c,...body}:c)
             resolve()
         }, 1000); // 1 seconds delay
     });
 
    
   },
-  getOne:async(id:string):Promise<Post|undefined> =>{
+  getOne:async(id:string):Promise<Comment|undefined> =>{
     
       return await new Promise(resolve => {
         setTimeout(() => {
-            const post = posts.find(p => p.id===id)
-            resolve(post)
+        const comment = comments.find(c=> c.id===id)
+            resolve(comment)
         }, 1000); // 1 seconds delay
     });
 
   },
-  getAll:async():Promise<Post[]>=>{
+  getAll:async():Promise<Comment[]>=>{
 
        return await new Promise(resolve => {
         setTimeout(() => {
-            resolve(posts);
+            resolve(comments);
         }, 1000); // 1 seconds delay
     });
   }
 }
 
 
-const create=(post:Omit<Post,'id'>):Promise<Post>=>{
+const create=(comment:Omit<Comment,'id'>):Promise<Comment>=>{
     
-  return db.create(post)
+  return db.create(comment)
     
 }
 
@@ -102,7 +122,7 @@ const patch=(id:string,post:Partial<Post>)=>{
 }
 
 
-const getOne=(id:string):Promise<Post|undefined>=>{
+const getOne=(id:string):Promise<Comment|undefined>=>{
 
   return   db.getOne(id)
  

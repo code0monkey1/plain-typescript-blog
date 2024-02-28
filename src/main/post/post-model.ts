@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 
-const postSchema = new Schema({
+const postSchema = new mongoose.Schema({
     id: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         required: false
     },
     subject: {
@@ -16,14 +15,26 @@ const postSchema = new Schema({
     },
     comments: {
         type: [{
-            type: Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
             ref: 'Comment',
-            unique: true
         }],
         default: []
-    }
+    },
+},{
+  timestamps:true
 });
 
-const Post = mongoose.model('Post', postSchema);
 
-module.exports = Post;
+postSchema.set('toJSON', {
+  transform: (document:any, returnedObject:any) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
+    // the passwordHash should not be revealed
+    delete returnedObject.password
+  }
+})
+
+
+
+export default  mongoose.model('Post', postSchema);

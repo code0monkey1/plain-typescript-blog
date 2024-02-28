@@ -1,7 +1,15 @@
-
 import commentRouter from './main/comment/comment-routes';
 import postRouter from './main/post/post-routes';
 import server from "./server";
+
+import db from './utils/db';
+
+(async()=>{
+
+  await db.connect()
+  
+})()
+
 
 server.use('/api/v1/',[postRouter,commentRouter])
 
