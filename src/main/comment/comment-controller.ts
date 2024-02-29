@@ -17,20 +17,28 @@ const getAll =async(_req:Request,res:Response,next:NextFunction)=>{
 }
 
 const getOne =async(req:Request,res:Response,next:NextFunction)=>{
+  
 
        const comment = await commentService.getOne(req.params.id)
-    
        return res.json(comment)
 
+
 }
 
-const remove =async(req:Request,res:Response,next:NextFunction)=>{
-       
-       await commentService.remove(req.params.id)
+const  deleteComment = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const id = req.params.id;
+        await commentService.deleteComment(id);
+        res.json({ message: "Comment deleted successfully" });
+    } catch (error) {
+        if (error instanceof Error) {
+           res.status(404).json({ error: error.message });
+        } else {
+             res.status(500).json({ error: "Failed to delete comment. Please try again." });
+        }
+    }
+};
 
-
-       res.end()
-}
 
 const patch=async(req:Request,res:Response,next:NextFunction)=>{
          
@@ -45,6 +53,6 @@ export default {
  create,
  getAll,
  getOne,
- remove,
+ deleteComment,
  patch
 }

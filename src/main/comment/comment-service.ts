@@ -1,142 +1,85 @@
 
 // posts collection
-import { posts } from "../post/post-service"
-import { Post } from "../post/post-types"
-import { Comment } from "./comment-types"
+import PostModel from "../post/post-model";
+import { Post } from "../post/post-types";
+import CommentModel from "./comment-model";
+import { Comment } from './comment-types';
 
-let id = 0
 
-export let comments =[] as Comment[]
-
-const db={
-
-  create:async(comment:Omit<Comment,'id'>):Promise<Comment>=>{
+const create=async(body:Omit<Comment,'id'>):Promise<Comment>=>{
     
-  
-   // Simulate a delay of 1 second before pushing the new post
-    return await new Promise(resolve => {
-        
-      setTimeout(() => {
-             id+=1
-            
-            const newComment :Comment  ={id:id+'',...comment}
+    //create comment
+    const response = await CommentModel.create(body) as any & {_id:string}
 
-            comments.push(newComment )
 
-            // also insert it in the posts comments array 
-            const postId = comment.postId
-            
-            const post = posts.find( p=> p.id==postId)
-
-            post?.comments.push(newComment.id)
-              
-             resolve(newComment)
-
-        }, 1000); // 1 seconds delay
-    });
-
-         
-  },
-  remove:async(id:string):Promise<void>=>{
-  
-       // Simulate a delay of 1 second before pushing the new post
-   return await new Promise(resolve => {
-        
-        setTimeout(() => {
-
-                  
-            const {postId} = comments.find( c => c.id==id)!
-            
-            comments = comments.filter( c => c.id!==id)
-
-            // also delete it from the post : comments array
-        
-            const post= (posts.find( p=> p.id==postId)) as Post
-
-            const filteredComments = post.comments.filter( c => c!==id )
-
-        
-            const mutatedPosts :Post []= posts.map( p=> p.id==postId? {...p,comments:filteredComments}:p)
-            
-            //clear all posts
-            posts.length=0
-
-            mutatedPosts.forEach( p => posts.push(p))
-
-            resolve()
-
-        }, 1000); // 1 seconds delay
-    });
+    const comment:Comment ={
+      postId:body.postId,
+      content:body.content,
+      id:response._id
+    }
     
+    // store comment reference in post
 
-  },
-  patch:async(id:string,body:Partial<Post>):Promise<void>=>{
+    const post = await PostModel.findById(body.postId)
+
+    if (!post) throw new Error('Post not found');
+    
+    post.comments=post.comments.concat(comment.id)
+    await post.save()
+
+    return comment
+    
+}
+
+const deleteComment=async(id:string)=>{
+
+    const comment = await CommentModel.findById(id) as Comment;
+
+    if (!comment) {
+        throw new Error("Comment not found");
+    }
+
+    const post = await PostModel.findById(comment.postId);
+
+    if (!post) {
+        throw new Error("Post not found");
+    }
+
+    await CommentModel.findByIdAndDelete(id);
+
+    const index = post.comments.indexOf(id);
+    
+    if (index > -1) {
+        post.comments.splice(index, 1);
+    }
+
+    await post.save();
 
 
-       return await new Promise(resolve => {
-        setTimeout(() => {
-            comments = comments.map( c => id==c.id?{...c,...body}:c)
-            resolve()
-        }, 1000); // 1 seconds delay
-    });
+}
 
+
+const patch=async(id:string,body:Partial<Post>)=>{
    
-  },
-  getOne:async(id:string):Promise<Comment|undefined> =>{
-    
-      return await new Promise(resolve => {
-        setTimeout(() => {
-        const comment = comments.find(c=> c.id===id)
-            resolve(comment)
-        }, 1000); // 1 seconds delay
-    });
-
-  },
-  getAll:async():Promise<Comment[]>=>{
-
-       return await new Promise(resolve => {
-        setTimeout(() => {
-            resolve(comments);
-        }, 1000); // 1 seconds delay
-    });
-  }
+  return  await CommentModel.findByIdAndUpdate(id, body, { new: true })
 }
 
 
-const create=(comment:Omit<Comment,'id'>):Promise<Comment>=>{
-    
-  return db.create(comment)
-    
-}
+const getOne=async(id:string):Promise<Comment|null>=>{
 
-const remove=(id:string)=>{
-
-  return  db.remove(id)
-
-}
-
-
-const patch=(id:string,post:Partial<Post>)=>{
-   
-  return  db.patch(id,post)
-}
-
-
-const getOne=(id:string):Promise<Comment|undefined>=>{
-
-  return   db.getOne(id)
+    return await CommentModel.findById(id)
  
 }
 
-const getAll=()=>{
+const getAll=async()=>{
  
- return db.getAll()
+ return await CommentModel.find({})
 
 }
 
 export default {
   create,
-  remove,
+  deleteComment,
   patch,
   getOne,
   getAll

@@ -1,3 +1,4 @@
+import registerRouter from './main/auth/register/register-routes';
 import commentRouter from './main/comment/comment-routes';
 import postRouter from './main/post/post-routes';
 import server from "./server";
@@ -11,7 +12,7 @@ import db from './utils/db';
 })()
 
 
-server.use('/api/v1/',[postRouter,commentRouter])
+server.use('/api/v1/',[postRouter,commentRouter,registerRouter])
 
 const PORT = 3001
 

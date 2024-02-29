@@ -13,8 +13,10 @@ const createPost=async(req:Request,res:Response,next:NextFunction)=>{
 
 const deletePostById =async(req:Request,res:Response,next:NextFunction)=>{
       
-     await postServices.remove(req.params.id)
-     
+      //delete post
+     await postServices.deletePost(req.params.id)
+
+     // delete comments associated with post
      res.end()
 
 }

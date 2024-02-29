@@ -1,75 +1,45 @@
 
+import CommentModel from "../comment/comment-model";
 import PostModel from "./post-model";
 import { Post } from './post-types';
 
-const db={
+const create=async(body:Omit<Post,'id'>):Promise<Post>=>{
+    
+  return await PostModel.create(body)
+    
+}
 
-  create:async(body:Omit<Post,'id'>):Promise<Post>=>{
+const deletePost=async(id:string)=>{
 
-    return await PostModel.create(body)
-         
-  },
-  remove:async(id:string):Promise<void>=>{
-  
+    //delete all  associated comments 
+    await CommentModel.deleteMany({ postId:id });
   
     return   await PostModel.findByIdAndDelete(id)
 
-  },
-  patch:async(id:string,body:Partial<Post>):Promise<void>=>{
+}
 
+
+const patch=async(id:string,body:Partial<Post>)=>{
+   
     await PostModel.findByIdAndUpdate(id, body, { new: true })
-    
-   
-  },
-  getOne:async(id:string):Promise<Post|undefined> =>{
-
-   return await PostModel.findById(id)
-    
-
-  },
-  getAll:async():Promise<Post[]>=>{
-
-      return await PostModel.find({})
-
-      
-  }
 }
 
 
-const create=(post:Omit<Post,'id'>):Promise<Post>=>{
-    
-  return db.create(post)
-    
-}
+const getOne=async (id:string):Promise<Post|undefined>=>{
 
-const remove=(id:string)=>{
-
-  return  db.remove(id)
-
-}
-
-
-const patch=(id:string,post:Partial<Post>)=>{
-   
-  return  db.patch(id,post)
-}
-
-
-const getOne=(id:string):Promise<Post|undefined>=>{
-
-  return   db.getOne(id)
+     return await PostModel.findById(id)
  
 }
 
-const getAll=()=>{
+const getAll=async()=>{
  
- return db.getAll()
+ return await PostModel.find({})
 
 }
 
 export default {
   create,
-  remove,
+  deletePost,
   patch,
   getOne,
   getAll

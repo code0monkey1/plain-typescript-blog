@@ -10,7 +10,7 @@ export default class Database {
   private static _database: Database;
 
   private constructor() {
-    const DB_URL = "mongodb+srv://vonnwatson:watson1985@mycanadianmentor.l7vqx.mongodb.net/simple-blog?authSource=admin&replicaSet=atlas-ocbp6d-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true";
+    const DB_URL = process.env.MONGODB_URL
 
     if (DB_URL) {
       console.log("starting to connect to db")
@@ -61,16 +61,19 @@ export default class Database {
 // Graceful shutdown
 function shutdown() {
   console.log('❗️❗️Shutting down server due to DB connection error');
-    process.exit(0);
+  process.exit(0);
 
 }
 
 // Catch the event and initiate shutdown
 // Catch the event and initiate shutdown
 eventEmitter.on('dbConnectionError', () => {
+   
+  console.log("Db connection error")
+
   shutdown()
 });
 
-// Handle shutdown signals
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
+// // Handle shutdown signals
+// process.on('SIGINT', shutdown);
+// process.on('SIGTERM', shutdown);
