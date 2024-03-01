@@ -11,9 +11,7 @@ declare module 'express' {
       
     try{
 
-
        if(!req.userId) throw new Error("Token Invalid")
-
         
        const comment = await commentService.create({...req.body,userId:req.userId})
   
@@ -34,6 +32,7 @@ declare module 'express' {
 const getAll =async(_req:Request,res:Response,next:NextFunction)=>{
     
         try{
+
             const comments = await commentService.getAll()
 
             res.json(comments)
@@ -50,8 +49,11 @@ const getAll =async(_req:Request,res:Response,next:NextFunction)=>{
 const getOne =async(req:Request,res:Response,next:NextFunction)=>{
   
        try{
+
             const comment = await commentService.getOne(req.params.id)
+
             return res.json(comment)
+            
        }catch(e){
             let message =""
 
@@ -64,20 +66,32 @@ const getOne =async(req:Request,res:Response,next:NextFunction)=>{
 }
 
 const  deleteComment = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-            const id = req.params.id;
-            await commentService.deleteComment(id);
-            res.json({ message: "Comment deleted successfully" });
+        try {
+                const id = req.params.id;
+
+                const comment = await commentService.getOne(req.params.id)
+        
+                if(!comment) throw new Error("Post does not exist")
+
+                console.log("The comment is",JSON.stringify(comment,null,2))
+        
+                if(!(comment.userId.toString()===req.userId))
+                    throw new Error("Unauthorized User")
+
+
+                await commentService.deleteComment(id);
+                
+                res.json({ message: "Comment deleted successfully" });
+                
+        } catch (error) {
             
-    } catch (error) {
-        
-            if (error instanceof Error) {
-            res.status(404).json({ error: error.message });
-            } else {
-                res.status(500).json({ error: "Failed to delete comment. Please try again." });
-            }
-        
-    }
+                if (error instanceof Error) {
+                res.status(404).json({ error: error.message });
+                } else {
+                    res.status(500).json({ error: "Failed to delete comment. Please try again." });
+                }
+            
+        }
 };
 
 

@@ -51,7 +51,8 @@ const deletePostById =async(req:Request,res:Response,next:NextFunction)=>{
 
             console.log("The post is",JSON.stringify(post,null,2))
       
-            if(!(post.userId.toString()===req.userId))throw new Error("Unauthorized User")
+            if(!(post.userId.toString()===req.userId))
+                   throw new Error("Unauthorized User")
 
             //delete post
             await postServices.deletePost(req.params.id)

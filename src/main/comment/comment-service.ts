@@ -5,22 +5,23 @@ import { Post } from "../post/post-types";
 import CommentModel from "./comment-model";
 import { Comment } from './comment-types';
 
+const isComment=(body:unknown) :body is Comment=>{
+    
+  return (body as Comment).postId!==undefined &&
+         (body as Comment).content!==undefined &&
+         (body as Comment).userId!==undefined &&
+         (body as Comment).id!==undefined 
+}
 
 const create=async(body:Omit<Comment,'id'>):Promise<Comment>=>{
     
     //create comment
-    const response = await CommentModel.create(body) as any & {_id:string}
+    const comment = await CommentModel.create(body) 
 
+    if(!isComment(comment)) 
+        throw new Error("The comment is not of correct type")
 
-    const comment:Comment ={
-      postId:body.postId,
-      content:body.content,
-      id:response._id,
-      userId:body.userId
-    }
-    
-    // store comment reference in post
-
+    // store commentId reference in post
     const post = await PostModel.findById(body.postId)
 
     if (!post) throw new Error('Post not found');
@@ -36,26 +37,21 @@ const deleteComment=async(id:string)=>{
 
     const comment = await CommentModel.findById(id) as Comment;
 
-    if (!comment) {
-        throw new Error("Comment not found");
-    }
+    if (!comment)  throw new Error("Comment not found");
 
+    // delete comment reference from respective post
     const post = await PostModel.findById(comment.postId);
 
-    if (!post) {
-        throw new Error("Post not found");
-    }
-
+    if (!post) throw new Error("Post not found");
+    
     await CommentModel.findByIdAndDelete(id);
 
     const index = post.comments.indexOf(id);
     
-    if (index > -1) {
-        post.comments.splice(index, 1);
-    }
+    if (index > -1)  post.comments.splice(index, 1);
+    else throw new Error("Comment does not belong to the Post")
 
     await post.save();
-
 
 }
 
