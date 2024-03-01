@@ -15,7 +15,8 @@ const create=async(body:Omit<Comment,'id'>):Promise<Comment>=>{
     const comment:Comment ={
       postId:body.postId,
       content:body.content,
-      id:response._id
+      id:response._id,
+      userId:body.userId
     }
     
     // store comment reference in post

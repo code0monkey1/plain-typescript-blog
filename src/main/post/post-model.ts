@@ -1,10 +1,6 @@
 const mongoose = require('mongoose');
 
 const postSchema = new mongoose.Schema({
-    id: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: false
-    },
     subject: {
         type: String,
         required: true
@@ -20,6 +16,10 @@ const postSchema = new mongoose.Schema({
         }],
         default: []
     },
+    userId:{// inject user data using user ObjectId
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'User'
+    }
 },{
   timestamps:true
 });
