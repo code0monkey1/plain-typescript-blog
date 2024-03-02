@@ -4,14 +4,7 @@ import PostModel from "../post/post-model";
 import { Post } from "../post/post-types";
 import CommentModel from "./comment-model";
 import { Comment } from './comment-types';
-
-const isComment=(body:unknown) :body is Comment=>{
-    
-  return (body as Comment).postId!==undefined &&
-         (body as Comment).content!==undefined &&
-         (body as Comment).userId!==undefined &&
-         (body as Comment).id!==undefined 
-}
+import { isComment } from "./comment-validators";
 
 const create=async(body:Omit<Comment,'id'>):Promise<Comment>=>{
     
@@ -49,7 +42,6 @@ const deleteComment=async(id:string)=>{
     const index = post.comments.indexOf(id);
     
     if (index > -1)  post.comments.splice(index, 1);
-    else throw new Error("Comment does not belong to the Post")
 
     await post.save();
 
@@ -57,7 +49,8 @@ const deleteComment=async(id:string)=>{
 
 
 const patch=async(id:string,body:Partial<Post>)=>{
-   
+
+
   return  await CommentModel.findByIdAndUpdate(id, body, { new: true })
 }
 

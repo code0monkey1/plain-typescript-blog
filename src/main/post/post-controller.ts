@@ -1,31 +1,15 @@
-import { NextFunction, Request, Response } from 'express';
-
+import { Request, Response } from 'express';
+import { getPostBody } from './post-helpers';
 import postServices from './post-service';
-import { Post } from './post-types';
-declare module 'express' {
-  interface Request {
-    userId?: string;
-  }
-}
+
 const createPost=async(req:Request,res:Response)=>{
 
-    
       try{
-
-            const postBody:Omit<Post,'id'> ={
-                  subject: req.body.subject,
-                  body: req.body.body,
-                  comments: [],
-                  userId: req.userId!
-            }
-
-            console.log("The post body is",JSON.stringify(postBody,null,4))
-
-             const post= await postServices.create( postBody)
+            
+             const post= await postServices.create(getPostBody(req.body,req.userId!))
                
              res.json(post)
-      
-      
+         
       }catch(e){ 
 
             let message = ""
@@ -38,18 +22,15 @@ const createPost=async(req:Request,res:Response)=>{
 }
 
 
-const deletePostById =async(req:Request,res:Response,next:NextFunction)=>{
+const deletePostById =async(req:Request,res:Response)=>{
 
 
       try{  
 
-            
             //verify if the user is the same 
             const post = await postServices.getOne(req.params.id)
       
             if(!post) throw new Error("Post does not exist")
-
-            console.log("The post is",JSON.stringify(post,null,2))
       
             if(!(post.userId.toString()===req.userId))
                    throw new Error("Unauthorized User")
@@ -72,7 +53,7 @@ const deletePostById =async(req:Request,res:Response,next:NextFunction)=>{
 
 }
 
-const patchPostById = async(req:Request,res:Response,next:NextFunction)=>{
+const patchPostById = async(req:Request,res:Response)=>{
 
       try{ 
 
@@ -93,7 +74,7 @@ const patchPostById = async(req:Request,res:Response,next:NextFunction)=>{
 }
 
 
-const getPostById=async(req:Request,res:Response,next:NextFunction)=>{
+const getPostById=async(req:Request,res:Response)=>{
 
 
       const post = await postServices.getOne(req.params.id)
@@ -107,7 +88,7 @@ const getPostById=async(req:Request,res:Response,next:NextFunction)=>{
 }
 
 
-const getAllPosts=async(_req:Request,res:Response,next:NextFunction)=>{
+const getAllPosts=async(_req:Request,res:Response)=>{
       
       const posts =await postServices.getAll()
       

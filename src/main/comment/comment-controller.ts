@@ -1,17 +1,9 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import commentService from "./comment-service";
-import { Comment } from "./comment-types";
 
-declare module 'express' {
-  interface Request {
-    userId?: string;
-  }
-}
- const create =async(req:Request,res:Response,next:NextFunction)=>{
+ const create =async(req:Request,res:Response)=>{
       
     try{
-
-       if(!req.userId) throw new Error("Token Invalid")
         
        const comment = await commentService.create({...req.body,userId:req.userId})
   
@@ -25,11 +17,9 @@ declare module 'express' {
         res.json({error:message})
     }
 
-
-
 }
 
-const getAll =async(_req:Request,res:Response,next:NextFunction)=>{
+const getAll =async(_req:Request,res:Response)=>{
     
         try{
 
@@ -46,7 +36,7 @@ const getAll =async(_req:Request,res:Response,next:NextFunction)=>{
         }
 }
 
-const getOne =async(req:Request,res:Response,next:NextFunction)=>{
+const getOne =async(req:Request,res:Response)=>{
   
        try{
 
@@ -62,10 +52,10 @@ const getOne =async(req:Request,res:Response,next:NextFunction)=>{
             res.json({error:message})
         }
 
-
 }
 
-const  deleteComment = async (req: Request, res: Response, next: NextFunction) => {
+const  deleteComment = async (req: Request, res: Response) => {
+        
         try {
                 const id = req.params.id;
 
@@ -94,10 +84,15 @@ const  deleteComment = async (req: Request, res: Response, next: NextFunction) =
         }
 };
 
+const patch=async(req:Request,res:Response)=>{
 
-const patch=async(req:Request,res:Response,next:NextFunction)=>{
+       try{  
+    
 
-       try{     
+            const comment = await commentService.getOne(req.params.id)
+        
+            if(!comment) throw new Error("Comment does not exist")
+
             await commentService.patch(req.params.id,req.body)
 
             res.end()
@@ -112,7 +107,6 @@ const patch=async(req:Request,res:Response,next:NextFunction)=>{
     }
 
 }
-
 
 export default { 
  create,

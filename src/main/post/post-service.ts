@@ -3,7 +3,7 @@ import CommentModel from "../comment/comment-model";
 import PostModel from "./post-model";
 import { Post } from './post-types';
 
-const create=async(body:Omit<Post,'id'>):Promise<Post>=>{
+const create=async(body:Omit<Post,'id'|'comments'>):Promise<Post>=>{
     
   return await PostModel.create(body)
     

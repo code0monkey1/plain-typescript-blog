@@ -6,8 +6,6 @@ const userAuth=async(req:Request,res:Response,next:NextFunction)=>{
    try{
 
       const decodedToken = await middlewareHelper.getDecodedToken(req)
-
-      console.log("The decodedToken is ",JSON.stringify(decodedToken,null,2))
    
       req.userId = decodedToken.userId
 

@@ -7,23 +7,18 @@ dotenv.config();
 const eventEmitter = new EventEmitter();
 
 export default class Database {
-  private static _database: Database;
 
-  private constructor() {
-    const DB_URL = process.env.MONGODB_URL
+  static connect() {
 
-    if (DB_URL) {
-      console.log("starting to connect to db")
       mongoose
-        .connect(DB_URL, {
+        .connect(process.env.MONGODB_URL!, {
           useNewUrlParser: true,
           useUnifiedTopology: true,
         } as ConnectOptions)
         .then(() =>
         {
           console.log('✅ Connected to DB')
-
-          // Health check
+          //Health check
           setInterval(() => {
             // Perform a test query or check the connection status
             if (!mongoose.connection.readyState) {
@@ -36,23 +31,17 @@ export default class Database {
         .catch((error) =>{
           let errorMessage ;
 
-          if (error instanceof Error){
+          if (error instanceof Error)
             errorMessage=error.message
-          }
+          
           console.error('❌ Not connected with database : ',errorMessage)
           process.exit(0);
         }
          );
-    }
   }
-  static connect() {
-    if (this._database) {
-      console.log("returning running database")
-      return this._database;
-    }
-    console.log("creating new database and returning it ")
-    this._database = new Database();
-    return (this._database = new Database());
+
+  static  disconnect(){
+    mongoose.connection.close()
   }
 }
 

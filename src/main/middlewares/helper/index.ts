@@ -6,7 +6,6 @@ type Token={
   username:string
 }
 
-
 export const getTokenFrom = (request:Request) =>{
         
  
@@ -25,21 +24,16 @@ export const getTokenFrom = (request:Request) =>{
 }
 
 
-const getDecodedToken =async(request:any):Promise<Token> =>{
+const getDecodedToken =(request:any):Token=>{
 
-    const token = await getTokenFrom(request)
-
-    console.log("The token is",token)
+    const token =  getTokenFrom(request)
 
     if(!token) throw new Error("token is missing")
-
-    console.log("The jwt secret is",process.env.JWT_SECRET)
     
     const decodedToken =  jwt.verify(token,process.env.JWT_SECRET!) as Token
    
     if(!token || !decodedToken.userId!) throw new Error("token is invalid")
     
-  
     return decodedToken
 }
 
