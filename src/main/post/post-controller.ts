@@ -1,22 +1,34 @@
 import { Request, Response } from 'express';
+import { ZodError } from 'zod';
 import { getPostBody } from './post-helpers';
 import postServices from './post-service';
+import { ZPostSchema } from './post-validator';
 
 const createPost=async(req:Request,res:Response)=>{
 
       try{
-            
+             
+            //validate the request body
+             ZPostSchema.parse(req.body)
+
              const post= await postServices.create(getPostBody(req.body,req.userId!))
                
              res.json(post)
          
       }catch(e){ 
 
+            
+            if (e instanceof ZodError) {
+               const errors = e.errors.map((error) => ({
+                        [error.path[0]]: error.message
+                  }));
+            return  res.json(errors)
+            }
+            
             let message = ""
             if (e instanceof Error) message=e.message
-
+      
             res.json({"error":message})
-
       }
 
 }
