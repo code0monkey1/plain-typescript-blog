@@ -2,8 +2,9 @@
 import CommentModel from "../comment/comment-model";
 import PostModel from "./post-model";
 import { Post } from './post-types';
+import { ZPostType } from "./post-validator";
 
-const create=async(body:Omit<Post,'id'|'comments'>):Promise<Post>=>{
+const create=async(body:Omit<ZPostType,'id'|'comments'>):Promise<Post>=>{
     
   return await PostModel.create(body)
     

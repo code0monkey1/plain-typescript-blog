@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { ZodError } from 'zod';
+import { AuthTokenNotProvidedError } from '../errors/AuthTokenNotProvidedError';
 import { getPostBody } from './post-helpers';
 import postServices from './post-service';
 import { ZPostSchema } from './post-validator';
@@ -7,16 +8,19 @@ import { ZPostSchema } from './post-validator';
 const createPost=async(req:Request,res:Response)=>{
 
       try{
-             
+
+            console.log("Got to post controller")
             //validate the request body
              ZPostSchema.parse(req.body)
+             
 
              const post= await postServices.create(getPostBody(req.body,req.userId!))
-               
+            
              res.json(post)
          
       }catch(e){ 
 
+            console.log("Error handler reached")
             
             if (e instanceof ZodError) {
                const errors = e.errors.map((error) => ({
@@ -26,9 +30,11 @@ const createPost=async(req:Request,res:Response)=>{
             }
             
             let message = ""
-            if (e instanceof Error) message=e.message
-      
-            res.json({"error":message})
+            if (e instanceof Error) 
+                  message=e.message
+            
+            console.log("Error handler reached")
+            res.status(401).json({"error":message})
       }
 
 }

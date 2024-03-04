@@ -1,5 +1,6 @@
 import { Request } from 'express';
 import jwt from 'jsonwebtoken';
+import { AuthTokenNotProvidedError } from '../../errors/AuthTokenNotProvidedError';
 
 type Token={
   userId:string,
@@ -28,7 +29,7 @@ const getDecodedToken =(request:any):Token=>{
 
     const token =  getTokenFrom(request)
 
-    if(!token) throw new Error("token is missing")
+    if(!token) throw new AuthTokenNotProvidedError()
     
     const decodedToken =  jwt.verify(token,process.env.JWT_SECRET!) as Token
    

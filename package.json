@@ -4,9 +4,9 @@
   "description": "",
   "main": "build/app.js",
   "scripts": {
-    "test": "jest   --watchAll --verbose",
-    "dev": "ts-node-dev src/app.ts",
-    "start": "node build/app.js",
+    "test": "NODE_ENV=test jest --watchAll --verbose",
+    "dev": "NODE_ENV=dev ts-node-dev src/app.ts",
+    "start": "NODE_ENV=prod node build/app.js",
     "build": "tsc"
   },
   "keywords": [],

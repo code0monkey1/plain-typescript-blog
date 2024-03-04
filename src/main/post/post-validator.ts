@@ -7,4 +7,4 @@ export const ZPostSchema =z.object({
     userId:z.string().optional()
 });
 
-export type ZCommentType=z.infer< typeof ZPostSchema>
+export type ZPostType=z.infer< typeof ZPostSchema>

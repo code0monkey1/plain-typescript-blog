@@ -1,8 +1,10 @@
 import supertest from "supertest";
 import app from '../../src/app';
+import UserModel from "../../src/main/auth/user/user-model";
+import commentModel from "../../src/main/comment/comment-model";
 import PostModel from "../../src/main/post/post-model";
 import Database from '../../src/utils/db';
-import { default as helper, default as postHelper } from "./post.helper";
+import helper, { initialPosts } from "./helper";
 
 const api = supertest(app)
 
@@ -22,9 +24,11 @@ describe('POST', () => {
       
         // delete all notes 
         await PostModel.deleteMany({}) 
+        await UserModel.deleteMany({}) 
+        await commentModel.deleteMany({})
       
         // saved all notes synchronously 
-        for( let post of helper.initialPosts ){
+        for( let post of initialPosts ){
                 const newPost = new PostModel(post)
                 await newPost.save()
           }
@@ -33,9 +37,35 @@ describe('POST', () => {
 
   describe('POST /post ', () => {
     
-    //post is created when token is present
-   
-    // post is not created with token is not present
+ 
+    it('is created when token is present', async() => {
+        
+       const {token}=helper.someUserInfo
+
+    
+        await  api
+     // Add the bearer token to the request headers
+          .post(postUrl)
+          .send(helper.initialPosts[0])
+          .set('Authorization', `Bearer ${token}`)
+          .expect(200)
+          .expect('Content-Type','application\/json; charset=utf-8')
+
+       
+    })
+    
+
+
+    it('is not created when token is not present', async() => {
+      
+        await  api
+          .post(postUrl)
+          .send(helper.initialPosts[0])
+          .expect(401)
+          .expect('Content-Type','application\/json; charset=utf-8')
+
+    })
+    
    
     // post in not created when invalid token is present
   })
@@ -88,8 +118,8 @@ describe('POST', () => {
       test('all posts are returned',async() => {
         
         const response = await api.get(postUrl)
+        expect(response.body).toHaveLength(initialPosts.length)
 
-        expect(response.body).toHaveLength(helper.initialPosts.length)
       })
 
 
@@ -97,7 +127,7 @@ describe('POST', () => {
         const response=  await api.get(postUrl)
         const allContent=response.body.map((res:any) => res.body)
 
-        expect(allContent).toContain(postHelper.initialPosts[0].body)
+        expect(allContent).toContain(initialPosts[0].body)
       })
 
           

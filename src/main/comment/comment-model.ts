@@ -28,5 +28,6 @@ commentSchema.set('toJSON', {
   }
 })
 
+const CommentModel = model('Comment', commentSchema);
 
-export default model('Comment', commentSchema);
+export default CommentModel
