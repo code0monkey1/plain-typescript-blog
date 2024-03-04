@@ -12,7 +12,7 @@ const createPost=async(req:Request,res:Response)=>{
 
              const post= await postServices.create(getPostBody(req.body,req.userId!))
             
-             res.json(post)
+             res.status(201).json(post)
 
 
 }
@@ -33,7 +33,7 @@ const deletePostById =async(req:Request,res:Response)=>{
             await postServices.deletePost(req.params.id)
             
             // delete comments associated with post
-            res.end()
+            res.status(204).end()
 
    
 

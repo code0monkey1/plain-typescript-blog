@@ -24,8 +24,8 @@ server.use('/api/v1/',[postRouter,commentRouter,userRouter] )
 if(process.env.NODE_ENV!=='prod'  )server.use('/api/v1/',resetRouter)
 
 
-// server.use(middleware.errorHandler)
-// server.use(middleware.unknownEndpoint)
+server.use(middlewares.errorHandler)
+server.use(middlewares.unknownEndpoint)
 
 const PORT = 3001
 
