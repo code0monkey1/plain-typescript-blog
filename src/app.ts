@@ -1,3 +1,4 @@
+import 'express-async-errors';
 import userRouter from './main/auth/user/user-routes';
 import commentRouter from './main/comment/comment-routes';
 import middlewares from './main/middlewares';
