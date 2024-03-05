@@ -1,68 +1,63 @@
 import * as dotenv from 'dotenv';
+import { EventEmitter } from 'events';
 import mongoose, { ConnectOptions } from 'mongoose';
-const { EventEmitter } = require('events');
+
 dotenv.config();
 
-// Create an event emitter instance
 const eventEmitter = new EventEmitter();
 
-export default class Database {
+class Database {
+  static async connect(url:string) {
 
-  static connect() {
+    try {
+      await mongoose.connect(url, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      } as ConnectOptions);
 
-      mongoose
-        .connect(process.env.MONGODB_URL!, {
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
-        } as ConnectOptions)
-        .then(() =>
-        {
-          console.log('✅ Connected to DB')
-          //Health check
-          setInterval(() => {
-            // Perform a test query or check the connection status
-            if (!mongoose.connection.readyState) {
-              console.error('DB connection error');
-              eventEmitter.emit('dbConnectionError');
-            }
-          }, 5000);
+      console.log('✅ Connected to DB');
 
-        })
-        .catch((error) =>{
-          let errorMessage ;
-
-          if (error instanceof Error)
-            errorMessage=error.message
-          
-          console.error('❌ Not connected with database : ',errorMessage)
-          process.exit(0);
+      // Health check
+      setInterval(() => {
+        if (!mongoose.connection.readyState) {
+          console.error('DB connection error');
+          eventEmitter.emit('dbConnectionError');
         }
-         );
+      }, 10000);
+    } catch (error) {
+      if(error instanceof Error)
+      console.error('❌ Not connected with database:', error.message);
+      eventEmitter.emit('dbConnectionError');
+    }
   }
 
-  static  disconnect(){
-    mongoose.connection.close()
+  static async disconnect() {
+    await mongoose.connection.close();
   }
 }
 
-
-// Graceful shutdown
-// Graceful shutdown
 function shutdown() {
-  console.log('❗️❗️Shutting down server due to DB connection error');
+  console.log('❗️❗️ Shutting down server due to DB connection error');
   process.exit(0);
-
 }
 
-// Catch the event and initiate shutdown
-// Catch the event and initiate shutdown
 eventEmitter.on('dbConnectionError', () => {
-   
-  console.log("Db connection error")
-
-  shutdown()
+  console.log('DB connection error');
+  shutdown();
 });
 
-// // Handle shutdown signals
-// process.on('SIGINT', shutdown);
-// process.on('SIGTERM', shutdown);
+process.on('SIGINT', () => {
+  console.log('Received SIGINT signal, shutting down gracefully');
+  Database.disconnect().then(() => {
+    process.exit(0);
+  });
+});
+
+process.on('SIGTERM', () => {
+  console.log('Received SIGTERM signal, shutting down gracefully');
+  Database.disconnect().then(() => {
+    process.exit(0);
+  });
+});
+
+export default Database;

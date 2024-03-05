@@ -1,3 +1,6 @@
+import { ZPostType } from "./post-validator"
+
+
 export type Post ={
     id:string,
     subject:string,
@@ -5,3 +8,9 @@ export type Post ={
     comments: string [] 
     userId:string
 }
+
+
+export type TUpdatePost =  Partial<ZPostType>
+
+
+

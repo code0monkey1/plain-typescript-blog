@@ -8,3 +8,7 @@ export const ZPostSchema =z.object({
 });
 
 export type ZPostType=z.infer< typeof ZPostSchema>
+
+
+export const ZUpdatePostSchema = ZPostSchema.partial()
+

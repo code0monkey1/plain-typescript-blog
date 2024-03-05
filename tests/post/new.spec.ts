@@ -1,15 +1,22 @@
-
-import mongoose from 'mongoose'
 import supertest from 'supertest'
 import app from '../../src/app'
 import PostModel from "../../src/main/post/post-model"
+import DbConnection from '../../src/utils/db'
 import helper from './helper'
-
 const api = supertest(app)
 
 const postsUrl = '/api/v1/posts'
 
+beforeAll(async () => {
+    await DbConnection.connect(process.env.MONGODB_URL!);
+  });
+
+afterAll(async () => {
+    await DbConnection.disconnect();
+  });
+
 describe('when there is initially some notes saved', () => {
+
   beforeEach(async () => {
     await PostModel.deleteMany({})
     await PostModel.insertMany(helper.initialPosts)
@@ -93,7 +100,7 @@ describe('when there is initially some notes saved', () => {
       expect(contents).not.toContain('async/await simplifies making async calls')
     })
 
-        it('succeeds with auth', async () => {
+    it('succeeds with auth', async () => {
           const newPost = {
             body: 'async/await simplifies making async calls',
             subject: 'subj',
@@ -139,6 +146,6 @@ describe('when there is initially some notes saved', () => {
   })
 })
 
-afterAll(async () => {
-  await mongoose.connection.close()
+afterAll( async() => {
+  await DbConnection.disconnect()
 })

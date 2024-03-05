@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { getPostBody } from './post-helpers';
 import postServices from './post-service';
-import { ZPostSchema } from './post-validator';
+import { ZPostSchema, ZUpdatePostSchema } from './post-validator';
 
 const createPost=async(req:Request,res:Response)=>{
 
@@ -36,12 +36,11 @@ const deletePostById =async(req:Request,res:Response)=>{
             res.status(204).end()
 
    
-
-
 }
 
 const patchPostById = async(req:Request,res:Response)=>{
-
+             
+            ZUpdatePostSchema.parse(req.body)
  
             await postServices.patch(req.params.id,req.body)
            

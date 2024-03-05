@@ -1,12 +1,15 @@
 
+
 const info = (...params:any) => {
-  if(process.env.NODE_ENV!=='test'){
+  if(process.env.NODE_ENV!=='prod'){
     console.log(...params)
   }
 }
 
 const error = (...params:any) => {
-  console.log(...params)
+    if(process.env.NODE_ENV!=='prod'){
+    console.error(...params)
+    }
 }
 
 export default  {

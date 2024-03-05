@@ -4,7 +4,7 @@
   "description": "",
   "main": "build/app.js",
   "scripts": {
-    "test": "NODE_ENV=test jest --watchAll --verbose",
+    "test": "NODE_ENV=test jest --watchAll --verbose --runInBand ",
     "dev": "NODE_ENV=dev ts-node-dev src/app.ts",
     "start": "NODE_ENV=prod node build/app.js",
     "build": "tsc"
@@ -32,6 +32,7 @@
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
+    "eslint": "^8.57.0",
     "express-async-errors": "^3.1.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.2.0",
