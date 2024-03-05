@@ -8,7 +8,7 @@ import server from "./server";
 import db from './utils/db';
 
 (async()=>{
-  await db.connect()
+  await db.connect(process.env.MONGODB_URL!)
 })()
 
 declare module 'express' {
@@ -25,9 +25,10 @@ if(process.env.NODE_ENV!=='prod'  )server.use('/api/v1/',resetRouter)
 
 
 server.use(middlewares.errorHandler)
+
 server.use(middlewares.unknownEndpoint)
 
-const PORT = 3001
+const PORT = process.env.NODE_ENV==='prod'? 3002 :3001
 
 server.listen(PORT,()=>{
    console.log("The express server is listening to port",PORT)
