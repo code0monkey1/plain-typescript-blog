@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import logger from "../../utils/logger";
+import { CreateCommentValidationError } from '../errors/CreateCommentValidationError';
 const requestLogger = (request:Request, response:Response,next:NextFunction) => {
   
   logger.info('---')
@@ -30,6 +31,8 @@ const errorHandler = (error:Error, request:Request, response:Response,next:NextF
     case 'CastError':
       return response.status(400).send({error: 'malformatted id' })
     case 'CreatePostValidationError':
+       return response.status(400).json({error: error.message })
+    case 'CreateCommentValidationError':
        return response.status(400).json({error: error.message })
     case 'UnauthorizedUserError':
          return response.status(404).json({error: error.message })
