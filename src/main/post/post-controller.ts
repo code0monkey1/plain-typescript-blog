@@ -1,14 +1,20 @@
 import { Request, Response } from 'express';
+import { ZodError } from 'zod';
+import { ZodErrorCapturer } from '../../utils/error-capture';
+import logger from '../../utils/logger';
+import { CreatePostValidationError } from '../errors/CreatePostValidationError';
 import { getPostBody } from './post-helpers';
 import postServices from './post-service';
 import { ZPostSchema, ZUpdatePostSchema } from './post-validator';
 
 const createPost=async(req:Request,res:Response)=>{
 
-            console.log("Got to post controller")
-            //validate the request body
-            ZPostSchema.parse(req.body)
-             
+            try {
+              ZPostSchema.parse(req.body);
+            } catch (e) {
+                  // capture all validation errors
+                    throw new CreatePostValidationError( new ZodErrorCapturer().getErrors(e));
+            }
 
              const post= await postServices.create(getPostBody(req.body,req.userId!))
             

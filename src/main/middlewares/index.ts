@@ -18,19 +18,25 @@ const unknownEndpoint = (request:Request, response:Response) => {
 const errorHandler = (error:Error, request:Request, response:Response,next:NextFunction) => {
   
 
-  logger.error("Reached Final Error Handler",
+  logger.error("Reached Final Error Handler : ",
   "error name:",error.name,
   "error message",error.message)
   
   switch (error.name) {
-    case 'CastError':
-      return response.status(400).send({ error: 'malformatted id' })
-    case 'ValidationError':
-       return response.status(400).json({ error: error.message })
     case 'JsonWebTokenError':
       return response.status(401).send({error:'invalid token'})
+    case 'AuthTokenNotProvidedError':
+      return response.status(401).json({error:"The auth token was not provided"})
+    case 'CastError':
+      return response.status(400).send({error: 'malformatted id' })
+    case 'CreatePostValidationError':
+       return response.status(400).json({error: error.message })
+    case 'UnauthorizedUserError':
+         return response.status(404).json({error: error.message })
+    case 'Error':
+      return response.status(400).json({ type:"YET_TO_DEFINE_ERROR",error_name:error.name , error_message:error.message})
     default:
-      console.error("Error not found : ",error.name,error.message)
+      console.error("Error not found : ")
   }
    
   next(error)

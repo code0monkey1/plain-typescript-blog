@@ -1,5 +1,6 @@
 
 import { z } from 'zod';
+import { ZPostSchema } from '../post/post-validator';
 import { Comment } from "./comment-types";
 export const isComment=(body:unknown) :body is Comment=>{
     
@@ -10,12 +11,13 @@ export const isComment=(body:unknown) :body is Comment=>{
 }
 
 
-
 export const ZCommentSchema =z.object({
     postId: z.string(),
     content: z.string(),
-    userId:z.string(),
 });
+
+export const ZUpdateCommentSchema= ZPostSchema.partial()
 
 export type ZCommentType=z.infer< typeof ZCommentSchema>
 
+export type ZUpdateCommentType= z.infer< typeof ZUpdateCommentSchema>

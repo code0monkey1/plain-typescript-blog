@@ -1,8 +1,9 @@
 // import { Post } from "./post-types";
 
-import { ZPostType } from "./post-validator"
+import { Post } from "./post-types"
 
-export const getPostBody=(body:any,userId:string):Omit<ZPostType,'id'| 'comments'> =>{
+
+export const getPostBody=(body:any,userId:string):Omit<Post,'id'| 'comments'> =>{
 
    return{
      subject:body.subject,
