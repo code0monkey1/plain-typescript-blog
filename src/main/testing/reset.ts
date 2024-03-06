@@ -13,7 +13,8 @@ app.use('/reset',async(_req:Request,res:Response)=>{
      await UserModel.deleteMany({})
      await PostModel.deleteMany({})
 
-    res.status(200).send({message:"deleted all Users, Posts and associated Comments"})
+    res.status(200).send({message:"Deleted all Users, Posts and Comments"})
+    
 })
 
 

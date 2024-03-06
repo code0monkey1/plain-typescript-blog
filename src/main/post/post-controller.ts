@@ -18,7 +18,7 @@ const createPost=async(req:Request,res:Response)=>{
 
              const post= await postServices.create(getPostBody(req.body,req.userId!))
             
-             res.status(201).json(post)
+             res.status(201).json({id:post.id})
 
 
 }
@@ -48,9 +48,9 @@ const patchPostById = async(req:Request,res:Response)=>{
              
             ZUpdatePostSchema.parse(req.body)
  
-            await postServices.patch(req.params.id,req.body)
+            const updatedPost=  await postServices.patch(req.params.id,req.body)
            
-            res.end()
+            res.json(updatedPost)
 
       
 }

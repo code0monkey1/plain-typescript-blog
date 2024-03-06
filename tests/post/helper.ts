@@ -2,7 +2,7 @@ import PostModel from "../../src/main/post/post-model";
 import { Post } from "../../src/main/post/post-types";
 
 
- export const initialPosts:Omit<Post,'id'|'comments'> []=[
+ export const initialPosts:Omit<Post,'id'|'comments'|'createdAt'|'updatedAt'> []=[
     {
       body:"a",
       subject:"s1",

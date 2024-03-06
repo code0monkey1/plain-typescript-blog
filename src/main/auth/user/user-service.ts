@@ -6,15 +6,13 @@ const findByEmailId=async(email:string):Promise<User> =>{
        const user= await UserModel.findOne({email}) as User
 
        return user
-    
 }
 
-const create =async(userInfo:User):Promise<User> =>{
+const create =async(userInfo:Omit<User,'id'>):Promise<User> =>{
   
     const user = await UserModel.create(userInfo) as any & User
 
     return user
-
 }
 
 const findById = async(id:string):Promise<User> => {

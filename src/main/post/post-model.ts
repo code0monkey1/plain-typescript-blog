@@ -9,12 +9,9 @@ const postSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    comments: {
-        type: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Comment',
-        }],
-        default: []
+    comments:{
+      type:Number,
+      default:0
     },
     userId:{// inject user data using user ObjectId
       type:mongoose.Schema.Types.ObjectId,

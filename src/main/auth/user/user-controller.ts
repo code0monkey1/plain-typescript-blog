@@ -22,7 +22,19 @@ const register = async(req:Request,res:Response)=>{
 
       const user = await userService.create(userInfo)
 
-      res.json({user})
+      //return json web token
+
+      const jwtPayload = {
+        userId:user.id.toString(),
+        username:user.username
+      }
+    
+      console.log("The jwt secret is",process.env.JWT_SECRET)
+      
+      const token = jwt.sign(jwtPayload,process.env.JWT_SECRET!)
+
+      res.json({token})
+
 
 
     }catch(e){

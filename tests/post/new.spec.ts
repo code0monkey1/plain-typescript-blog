@@ -38,7 +38,7 @@ describe('when there is initially some notes saved', () => {
  
   })
 
-  it('a specific note is within the returned notes', async () => {
+  it('a specific post is within the returned posts', async () => {
     const response = await api.get(postsUrl)
 
     const subjects = response.body.map((r:any) => r.subject)
@@ -46,7 +46,7 @@ describe('when there is initially some notes saved', () => {
     expect(subjects).toContain('s1')
   })
 
-  describe('viewing a specific note', () => {
+  describe('viewing a specific post', () => {
 
     it('succeeds with a valid id', async () => {
       const postsAtStart = await helper.getPostsInDb()
@@ -61,7 +61,7 @@ describe('when there is initially some notes saved', () => {
         expect(resultNote.body.body).toBe(postToView.body)
     })
 
-    it('fails with statuscode 404 if note does not exist', async () => {
+    it('fails with statuscode 404 if post does not exist', async () => {
       const validNonexistingId = await helper.nonExistingId()
 
       await api
@@ -79,7 +79,7 @@ describe('when there is initially some notes saved', () => {
     })
   })
 
-  describe('addition of a new note', () => {
+  describe('addition of a new post', () => {
     it('does not succeeds without auth', async () => {
       const newPost = {
         body: 'async/await simplifies making async calls',
@@ -120,9 +120,9 @@ describe('when there is initially some notes saved', () => {
           expect(contents).toContain(newPost.subject)
         })
 
-   
+      
 
-  describe('deletion of a note', () => {
+  describe('deletion of a post', () => {
     it('succeeds with status code 204 if id is valid', async () => {
       const postsAtStart = await helper.getPostsInDb()
       const postToDelete = postsAtStart[0]

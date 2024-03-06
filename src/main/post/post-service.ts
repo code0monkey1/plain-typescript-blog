@@ -20,9 +20,9 @@ const deletePost=async(id:string)=>{
 }
 
 
-const patch=async(id:string,body:Partial<Post>)=>{
+const patch=async(id:string,body:Partial<Post>):Promise<Post>=>{
    
-    await PostModel.findByIdAndUpdate(id, body, { new: true })
+     return  await PostModel.findByIdAndUpdate(id, body, { new: true }) as Post
 }
 
 

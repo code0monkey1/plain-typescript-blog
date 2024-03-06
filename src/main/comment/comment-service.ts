@@ -1,5 +1,6 @@
 
 // posts collection
+import { PostNotFoundError } from "../errors/PostNotFoundError";
 import PostModel from "../post/post-model";
 import { Post } from "../post/post-types";
 import CommentModel from "./comment-model";
@@ -17,9 +18,10 @@ const create=async(body:Omit<Comment,'id'>):Promise<Comment>=>{
     // store commentId reference in post
     const post = await PostModel.findById(body.postId)
 
-    if (!post) throw new Error('Post not found');
+    if (!post) throw new PostNotFoundError()
     
-    post.comments=post.comments.concat(comment.id)
+    post.comments=post.comments+1
+    
     await post.save()
 
     return comment
@@ -38,10 +40,8 @@ const deleteComment=async(id:string)=>{
     if (!post) throw new Error("Post not found");
     
     await CommentModel.findByIdAndDelete(id);
-
-    const index = post.comments.indexOf(id);
     
-    if (index > -1)  post.comments.splice(index, 1);
+    post.comments=post.comments-1
 
     await post.save();
 

@@ -7,14 +7,11 @@ const router = express.Router()
 
 router.post('/comments',userAuth,commentController.create)
 
-router.get('/comments',commentController.getAll)
-
-router.get('/comments/:id',commentController.getOne)
+router.get('/comments/:postId',commentController.getLatestCommentsByPostId)
 
 router.delete('/comments/:id',userAuth,commentController.deleteComment)
 
 router.patch('/comments/:id',userAuth,commentController.patch)
-
 
 
 export default router
