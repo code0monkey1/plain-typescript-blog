@@ -4,10 +4,10 @@ import CommentModel from '../comment/comment-model'
 import PostModel from '../post/post-model'
 
 
-const app = express()
+const route = express.Router()
 
 
-app.use('/reset',async(_req:Request,res:Response)=>{
+route.post('/reset',async(_req:Request,res:Response)=>{
 
      await CommentModel.deleteMany({})
      await UserModel.deleteMany({})
@@ -18,4 +18,4 @@ app.use('/reset',async(_req:Request,res:Response)=>{
 })
 
 
-export default app
+export default route

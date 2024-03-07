@@ -1,74 +1,67 @@
+import mongoose from 'mongoose';
 import supertest from 'supertest';
 import app from '../../src/app';
 import CommentModel from "../../src/main/comment/comment-model";
 import { Comment } from "../../src/main/comment/comment-types";
 import PostModel from "../../src/main/post/post-model";
-import Database from "../../src/utils/db";
 import helper, { getCommentsInDb, getPostsInDb } from "../helper";
-const api = supertest(app)
 
+const api = supertest(app);
 
-beforeAll(async () => {
-    await Database.connect(process.env.MONGODB_URL!);
-  });
-
-afterAll(async () => {
-    await Database.disconnect();
-  });
-  
 describe('COMMENT', () => {
 
-  const COMMENT_URL ='/api/v1/comments'
+  afterAll(async () => {
+    await mongoose.connection.close();
+  });
 
+  const COMMENT_URL = '/api/v1/comments';
 
-
-  describe('create-comment', () => {
-      
+  describe('/create-comment', () => {
     beforeEach(async () => {
+      await PostModel.deleteMany({});
+      await PostModel.insertMany(helper.initialPosts);
+      await CommentModel.deleteMany({});
+    });
 
-    await PostModel.deleteMany({})
-    await PostModel.insertMany(helper.initialPosts)
+    it("should create a new comment", async () => {
+      const posts = await getPostsInDb();
+      const userId = helper.someUserInfo.userId;
+      const token = helper.someUserInfo.token;
 
-    // create comments ,and attach it's id to initial comments
-    await CommentModel.deleteMany({})
+      const comment: Omit<Comment, 'id'> = {
+        postId: posts[0].id,
+        content: 'myContent',
+        userId
+      };
 
-  })
-        
-
-    it("should create a new comment",async()=>{
-         
-      //arrange
-      const posts = await getPostsInDb()
-      const userId = helper.someUserInfo.userId
-      const token = helper.someUserInfo.token
-
-      const comment:Omit<Comment,'id'> = {
-            postId:posts[0].id,
-            content:'myContent',
-            userId
-      }
-   
-
-      //act
-       await api
+      await api
         .post(COMMENT_URL)
         .send(comment)
         .expect(200)
         .set('Authorization', `Bearer ${token}`)
-        .expect('Content-Type', /application\/json/)
-      
-      //assert
-       const commentsInDb = await getCommentsInDb()
+        .expect('Content-Type', /application\/json/);
 
-       expect(commentsInDb[0].content).toBe(comment.content)
-         
-    })
-  
-    
-    it.todo("should return 401 error when JWT not provided")
+      const commentsInDb = await getCommentsInDb();
+      expect(commentsInDb[0].content).toBe(comment.content);
+    });
 
+    it("should return 401 error when JWT not provided",async()=>{
     
-  })
-  
-  
-})
+      const posts = await getPostsInDb();
+      const userId = helper.someUserInfo.userId;;
+
+      const comment: Omit<Comment, 'id'> = {
+        postId: posts[0].id,
+        content: 'myContent',
+        userId
+      };
+
+      await api
+        .post(COMMENT_URL)
+        .send(comment)
+        .expect(401)
+
+
+    });
+  });
+});
