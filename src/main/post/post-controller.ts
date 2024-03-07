@@ -57,11 +57,11 @@ const patchPostById = async(req:Request,res:Response)=>{
 
 
 const getPostById=async(req:Request,res:Response)=>{
-           console.log("got to getPostById controller")
+      
           const post = await postServices.getOne(req.params.id)
     
           if(!post) return res.status(404).end()
-          console.log("Got post",JSON.stringify(post,null,2))
+
           res.json(post)
  
 }

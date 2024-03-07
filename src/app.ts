@@ -6,6 +6,7 @@ import postRouter from './main/post/post-routes';
 import resetRouter from './main/testing/reset';
 import server from "./server";
 import db from './utils/db';
+import logger from './utils/logger';
 
 (async()=>{
   await db.connect(process.env.MONGODB_URL!)
@@ -30,7 +31,7 @@ server.use(middlewares.errorHandler)
 const PORT = process.env.NODE_ENV==='prod'? 3002 :3001
 
 server.listen(PORT,()=>{
-   console.log("The express server is listening to port",PORT)
+   logger.info("The express server is listening to port",PORT)
 }) 
 
 

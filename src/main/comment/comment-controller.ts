@@ -47,7 +47,6 @@ const  deleteComment = async (req: Request, res: Response) => {
         
                 if(!comment)  throw new CommentNotFoundError()
 
-                console.log("The comment is",JSON.stringify(comment,null,2))
         
                 if(!(comment.userId.toString()===req.userId))
                       throw  new UnauthorizedUserError()

@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 import { EventEmitter } from 'events';
 import mongoose, { ConnectOptions } from 'mongoose';
-
+import logger from './logger';
 dotenv.config();
 
 const eventEmitter = new EventEmitter();
@@ -15,18 +15,18 @@ class Database {
         useUnifiedTopology: true,
       } as ConnectOptions);
 
-      console.log('✅ Connected to DB');
+      logger.info('✅ Connected to DB');
 
       // Health check
       setInterval(() => {
         if (!mongoose.connection.readyState) {
-          console.error('DB connection error');
+          logger.error('DB connection error');
           eventEmitter.emit('dbConnectionError');
         }
       }, 10000);
     } catch (error) {
       if(error instanceof Error)
-      console.error('❌ Not connected with database:', error.message);
+      logger.error('❌ Not connected with database:', error.message);
       eventEmitter.emit('dbConnectionError');
     }
   }
@@ -37,24 +37,24 @@ class Database {
 }
 
 function shutdown() {
-  console.log('❗️❗️ Shutting down server due to DB connection error');
+  logger.error('❗️❗️ Shutting down server due to DB connection error');
   process.exit(0);
 }
 
 eventEmitter.on('dbConnectionError', () => {
-  console.log('DB connection error');
+  logger.info('DB connection error');
   shutdown();
 });
 
 process.on('SIGINT', () => {
-  console.log('Received SIGINT signal, shutting down gracefully');
+  logger.error('Received SIGINT signal, shutting down gracefully');
   Database.disconnect().then(() => {
     process.exit(0);
   });
 });
 
 process.on('SIGTERM', () => {
-  console.log('Received SIGTERM signal, shutting down gracefully');
+  logger.error('Received SIGTERM signal, shutting down gracefully');
   Database.disconnect().then(() => {
     process.exit(0);
   });

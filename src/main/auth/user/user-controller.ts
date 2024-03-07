@@ -28,8 +28,7 @@ const register = async(req:Request,res:Response)=>{
         userId:user.id.toString(),
         username:user.username
       }
-    
-      console.log("The jwt secret is",process.env.JWT_SECRET)
+  
       
       const token = jwt.sign(jwtPayload,process.env.JWT_SECRET!)
 
@@ -70,7 +69,6 @@ const login =async(req:Request,res:Response)=>{
       username:registeredUser.username
     }
    
-    console.log("The jwt secret is",process.env.JWT_SECRET)
     
     const token = jwt.sign(jwtPayload,process.env.JWT_SECRET!)
 

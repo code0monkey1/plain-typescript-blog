@@ -1,5 +1,7 @@
-import PostModel from "../../src/main/post/post-model";
-import { Post } from "../../src/main/post/post-types";
+import CommentModel from "../src/main/comment/comment-model";
+import { Comment } from "../src/main/comment/comment-types";
+import PostModel from "../src/main/post/post-model";
+import { Post } from "../src/main/post/post-types";
 
 
  export const initialPosts:Omit<Post,'id'|'comments'|'createdAt'|'updatedAt'> []=[
@@ -44,6 +46,14 @@ import { Post } from "../../src/main/post/post-types";
        return posts.map( (p:any) => p.toJSON())
   }
 
+    export const getCommentsInDb=async()=>{
+
+       const comments= await CommentModel.find({})
+
+       return comments.map( (c:any) => c.toJSON())
+  }
+
+
   const otherUserInfo={
 
        user:{
@@ -65,6 +75,13 @@ import { Post } from "../../src/main/post/post-types";
   await post.deleteOne()
 
   return post._id.toString()
+}
+
+const createPost=async(body:any,userId?:string)=>{
+
+  const post = new PostModel({...body,userId})
+  await post.save()
+
 }
 
   export const getInvalidToken=()=>"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWU1ODAyMTEwNmM5OTM0ZWE2MjUwMjMiLCJ1c2VybmFtZSI6InNrZCIsImlhdCI6MTcwOTUzOTM2N30.sdsXf_CgGzozF1VrwNXWXjE96mEFIkN_UmdC3ApKfk"

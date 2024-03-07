@@ -2,7 +2,7 @@ import supertest from 'supertest'
 import app from '../../src/app'
 import PostModel from "../../src/main/post/post-model"
 import DbConnection from '../../src/utils/db'
-import helper from './helper'
+import helper from '../helper'
 const api = supertest(app)
 
 const postsUrl = '/api/v1/posts'

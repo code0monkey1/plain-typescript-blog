@@ -11,10 +11,7 @@ export const getTokenFrom = (request:Request) =>{
         
  
     const authorization = request.get('authorization')
-
-    console.log("The authorization is ",authorization)
-    // will be null if no authorization , if not then check if it starts with bearer 
-    // is so, return the token
+    
    if(authorization && authorization.toLowerCase().startsWith('bearer ')){
 
       return authorization.substring(7)
