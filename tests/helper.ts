@@ -77,12 +77,22 @@ import { Post } from "../src/main/post/post-types";
   return post._id.toString()
 }
 
-const createPost=async(body:any,userId?:string)=>{
 
-  const post = new PostModel({...body,userId})
-  await post.save()
+const initialComments:Omit<Comment,'id'|'postId'>[]=[
+    {
+      
+      content:'some_content',
+      userId:"65e587aa491c70c47fae49d1",
 
-}
+    },
+    {
+      
+      content:'other_content',
+      userId:"65e587aa491c70c47fae49d1",
+
+    }
+
+]
 
   export const getInvalidToken=()=>"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWU1ODAyMTEwNmM5OTM0ZWE2MjUwMjMiLCJ1c2VybmFtZSI6InNrZCIsImlhdCI6MTcwOTUzOTM2N30.sdsXf_CgGzozF1VrwNXWXjE96mEFIkN_UmdC3ApKfk"
 
@@ -93,5 +103,6 @@ const createPost=async(body:any,userId?:string)=>{
     someUserInfo,
     otherUserInfo,
     getPostsInDb,
-    nonExistingId
+    nonExistingId,
+    initialComments
   }
