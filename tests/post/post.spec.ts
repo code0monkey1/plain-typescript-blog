@@ -4,7 +4,7 @@ import app from '../../src/app';
 import PostModel from "../../src/main/post/post-model";
 import helper from '../helper';
 const api = supertest(app);
-const postsUrl = '/api/v1/posts';
+const POST_URL = '/api/v1/posts';
 
 describe('when there is initially some notes saved', () => {
 
@@ -19,18 +19,18 @@ describe('when there is initially some notes saved', () => {
 
   it('posts are returned as json', async () => {
     await api
-      .get(postsUrl)
+      .get(POST_URL)
       .expect(200)
       .expect('Content-Type', /application\/json/);
   });
 
   it('all posts are returned', async () => {
-    const response = await api.get(postsUrl);
+    const response = await api.get(POST_URL);
     expect(response.body.length).toBe(helper.initialPosts.length);
   });
 
   it('a specific post is within the returned posts', async () => {
-    const response = await api.get(postsUrl);
+    const response = await api.get(POST_URL);
     const subjects = response.body.map((r: any) => r.subject);
     expect(subjects).toContain('s1');
   });
@@ -41,7 +41,7 @@ describe('when there is initially some notes saved', () => {
       const postToView = postsAtStart[0];
 
       const resultNote = await api
-        .get(postsUrl + `/${postToView.id}`)
+        .get(POST_URL + `/${postToView.id}`)
         .expect(200)
         .expect('Content-Type', /application\/json/);
 
@@ -51,14 +51,14 @@ describe('when there is initially some notes saved', () => {
     it('fails with statuscode 404 if post does not exist', async () => {
       const validNonexistingId = await helper.nonExistingId();
       await api
-        .get(postsUrl + `/${validNonexistingId}`)
+        .get(POST_URL + `/${validNonexistingId}`)
         .expect(404);
     });
 
     it('fails with statuscode 400 id is invalid', async () => {
       const invalidId = '5a3d5da59070081a82a3445';
       await api
-        .get(postsUrl + `/${invalidId}`)
+        .get(POST_URL + `/${invalidId}`)
         .expect(400);
     });
   });
@@ -71,7 +71,7 @@ describe('when there is initially some notes saved', () => {
       };
 
       await api
-        .post(postsUrl)
+        .post(POST_URL)
         .send(newPost)
         .expect(401)
         .expect('Content-Type', /application\/json/);
@@ -91,7 +91,7 @@ describe('when there is initially some notes saved', () => {
       const token = helper.someUserInfo.token;
 
       await api
-        .post(postsUrl)
+        .post(POST_URL)
         .send(newPost)
         .set('Authorization', `Bearer ${token}`)
         .expect(201);
@@ -111,7 +111,7 @@ describe('when there is initially some notes saved', () => {
       const token = helper.someUserInfo.token;
 
       await api
-        .delete(postsUrl + `/${postToDelete.id}`)
+        .delete(POST_URL + `/${postToDelete.id}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(204);
 
