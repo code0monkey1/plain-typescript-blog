@@ -10,7 +10,7 @@ import { CommentNotFoundError } from "./errors/CommentNotFoundError";
 import { mapCollection } from "./utils";
 
 
- const create =async(req:Request,res:Response)=>{
+ const createComment =async(req:Request,res:Response)=>{
       
        try{
            ZCommentSchema.parse(req.body)
@@ -26,17 +26,6 @@ import { mapCollection } from "./utils";
 }
 
 
-const getOne =async(req:Request,res:Response)=>{
-  
-
-
-            const comment = await commentService.getOne(req.params.id)
-
-            return res.json(comment)
-            
-    
-
-}
 
 const  deleteComment = async (req: Request, res: Response) => {
         
@@ -85,7 +74,7 @@ const  deleteComment = async (req: Request, res: Response) => {
       }
 
 
-const patch=async(req:Request,res:Response)=>{
+const updateComment=async(req:Request,res:Response)=>{
 
             try{
                   ZUpdateCommentSchema.parse(req.body)
@@ -108,9 +97,8 @@ const patch=async(req:Request,res:Response)=>{
 }
 
 export default { 
- create,
- getOne,
+ createComment,
  getLatestCommentsByPostId,
  deleteComment,
- patch
+ updateComment
 }

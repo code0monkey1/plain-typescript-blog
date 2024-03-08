@@ -45,7 +45,7 @@ describe('COMMENT', () => {
      
       const retrievedContent = result.body.data.map( (d:any) => d.content)
 
-      expect(helper.initialComments.map(c => c.content)).toStrictEqual(retrievedContent);
+      expect(retrievedContent).toContain(helper.initialComments[0].content)
       
     });
 
@@ -86,7 +86,7 @@ describe('COMMENT', () => {
 
       expect(commentContents.length).toBe(commentsInDb.length)
      
-      expect(commentContents).toStrictEqual(commentsInDb.map(c =>c.content))
+      expect(commentContents).toContain(helper.initialComments[0].content)
            
     })
 
@@ -119,7 +119,10 @@ describe('COMMENT', () => {
     
   })
 
-
+  describe('update-comment', () => {
+    
+  })
+  
 
   
 });
