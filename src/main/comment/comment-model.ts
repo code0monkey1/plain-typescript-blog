@@ -32,6 +32,16 @@ const commentSchema = new Schema<IComment>({
 
 commentSchema.plugin(mongoosePaginate);
 
+commentSchema.set('toJSON', {
+  transform: (document:any, returnedObject:any) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
+
+  }
+})
+
+
 const CommentModel = mongoose.model<IComment, ICommentModel>('Comment', commentSchema);
 
 export default CommentModel;

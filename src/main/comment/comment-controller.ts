@@ -40,7 +40,7 @@ const  deleteComment = async (req: Request, res: Response) => {
                 if(!(comment.userId.toString()===req.userId))
                       throw  new UnauthorizedUserError()
 
-
+           
                 await commentService.deleteComment(id);
                 
                 res.json({ message: "Comment deleted successfully" });
@@ -75,12 +75,13 @@ const  deleteComment = async (req: Request, res: Response) => {
 
 
 const updateComment=async(req:Request,res:Response)=>{
+       
 
             try{
                   ZUpdateCommentSchema.parse(req.body)
                   
             }catch(e){
-                  
+                
                throw new ValidationError( new ZodErrorCapturer().getErrors(e))
             }
 
@@ -88,6 +89,9 @@ const updateComment=async(req:Request,res:Response)=>{
             const comment = await commentService.getOne(req.params.id)
         
             if(!comment) throw new CommentNotFoundError()
+
+            if(!(comment.userId.toString()===req.userId))
+                        throw  new UnauthorizedUserError()
 
            const updatedComment= await commentService.patch(req.params.id,req.body)
 

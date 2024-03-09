@@ -1,8 +1,8 @@
 export class CreatePostValidationError extends Error{
   
-  constructor(message?:any){
+  constructor(message:any){
   
-    super(message?message:"The data to create a new post is invalid")
+    super(message)
 
     this.name='CreatePostValidationError'
 

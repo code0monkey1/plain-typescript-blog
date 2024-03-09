@@ -3,6 +3,7 @@ import { ZodError } from 'zod';
 import { ZodErrorCapturer } from '../../utils/error-capture';
 import logger from '../../utils/logger';
 import { CreatePostValidationError } from '../errors/CreatePostValidationError';
+import { ValidationError } from '../errors/ValidationError';
 import { getPostBody } from './post-helpers';
 import postServices from './post-service';
 import { ZPostSchema, ZUpdatePostSchema } from './post-validator';
@@ -45,8 +46,14 @@ const deletePostById =async(req:Request,res:Response)=>{
 }
 
 const patchPostById = async(req:Request,res:Response)=>{
-             
+
+          try{
+
             ZUpdatePostSchema.parse(req.body)
+          }catch(e){
+             throw new ValidationError(new ZodErrorCapturer().getErrors(e))
+          }
+             
  
             const updatedPost=  await postServices.patch(req.params.id,req.body)
            
