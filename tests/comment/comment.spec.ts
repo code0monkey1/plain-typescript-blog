@@ -19,21 +19,17 @@ describe('COMMENT', () => {
  
 
   beforeEach(async () => {
-    
-    await PostModel.deleteMany({});
-    await PostModel.insertMany(helper.initialPosts);
+     
+    await initializePosts()
     await CommentModel.deleteMany({});
 
-    //create a post
-    const posts = (await getPostsInDb())[0];
-    const userId = helper.someUserInfo.userId;
-    const postId=  posts.id
-    await CommentModel.insertMany(helper.initialComments.map(c=> ({...c,userId,postId})))
+    const postId = (await getPostsInDb())[0].id;
+    
+    await createCommentsUsingPostIdAndUserId(helper.someUserInfo.userId,postId)
 
   });
   describe('create-comment', () => {
-
-    it("should create a new comment", async () => {
+   it("should create a new comment when comment body is valid", async () => {
      
      const posts = await getPostsInDb();
      const postId = posts[0].id
@@ -46,6 +42,37 @@ describe('COMMENT', () => {
       const retrievedContent = result.body.data.map( (d:any) => d.content)
 
       expect(retrievedContent).toContain(helper.initialComments[0].content)
+      
+    });
+
+    it("should return validation error when comment body is invalid", async () => {
+     
+     const userId =helper.someUserInfo.userId
+     const postId = (await getPostsInDb())[0].id
+     const token = helper.someUserInfo.token
+   
+
+     const error_message="Expected string, received number"
+  
+     const commentsInDb = await getCommentsInDb()
+        const comment=  {
+        content:1,
+        userId,
+        postId
+      }
+
+      const result= await api
+        .post(COMMENT_URL)
+        .send(comment)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(400)
+
+      const commentsInDAfter = await getCommentsInDb()
+      
+         //assert
+       expect(JSON.parse(result.body.error)[0].content).toBe(error_message)
+       
+       expect(commentsInDb.length).toBe(commentsInDAfter.length)
       
     });
 
@@ -330,6 +357,20 @@ describe('COMMENT', () => {
     
   })
   
-  
+   const createCommentsUsingPostIdAndUserId=async(userId:string,postId:string)=>{
+
+      let result = helper.initialComments.map( c => new CommentModel({...c,userId,postId})).map(c => c.save())
+      
+      await Promise.all( result)
+
+      return result
+
+   }
+
+   const initializePosts=async()=>{
+    await PostModel.deleteMany({});
+    await PostModel.insertMany(helper.initialPosts.slice(0,2));
+   }
+
   
 });
