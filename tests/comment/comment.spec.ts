@@ -25,9 +25,9 @@ describe('COMMENT', () => {
     await CommentModel.deleteMany({});
 
     //create a post
-    const posts = await getPostsInDb();
+    const posts = (await getPostsInDb())[0];
     const userId = helper.someUserInfo.userId;
-    const postId= await posts[0].id
+    const postId=  posts.id
     await CommentModel.insertMany(helper.initialComments.map(c=> ({...c,userId,postId})))
 
   });
@@ -90,13 +90,13 @@ describe('COMMENT', () => {
            
     })
 
-    it('should return a 401 with `malformatted id` in case the postId is invalid',async()=>{
+    it('should return a 401 with `malformatted id` in case the commentId is invalid',async()=>{
 
-        const invalidPostId = 'abc'
+        const invalidCommentId = 'abc'
         const expected_error_message ='malformatted id'
 
        const result = await api
-        .get(COMMENT_URL+`/${invalidPostId}`)
+        .get(COMMENT_URL+`/${invalidCommentId}`)
         .expect(400)
 
        expect(result.body.error).toBe(expected_error_message)
@@ -164,8 +164,8 @@ describe('COMMENT', () => {
        expect(result.body.content).toBe(comment_to_update.content)
     })
 
-    it('should not update when the user updating is not the one who created it',async()=>{
- // arrange
+    it('should not update when user is unauthorized',async()=>{
+     // arrange
         const commentsInDb = await getCommentsInDb()
         const error_message = "User Not Authorized To Perform The Operation"
        const comment_to_update = {
@@ -210,7 +210,126 @@ describe('COMMENT', () => {
     })
     
   })
-  
 
+  describe('delete-comment', () => {
+      it('should return a 401 with `malformatted id` in case the commentId is invalid',async()=>{
+
+          const invalidPostId = 'abc'
+          const expected_error_message ='malformatted id'
+          const token = helper.someUserInfo.token
+          
+        const result = await api
+          .delete(COMMENT_URL+`/${invalidPostId}`)
+          .set('Authorization', `Bearer ${token}`)
+          .expect(400)
+
+        expect(result.body.error).toBe(expected_error_message)
+        
+    })
+
+        it('should return 401 if token is not provided',async()=>{
+       
+        // arrange
+         const commentsInDb = await getCommentsInDb()
+          
+        // act 
+
+        //assert
+        await api
+        .delete(COMMENT_URL+`/${commentsInDb[0].id}`)
+        .expect(401)
+      })
+
+     
+      it('should return 401 if token is not provided',async()=>{
+       
+        // arrange
+         const commentsInDb = await getCommentsInDb()
+          
+        // act 
+
+        //assert
+        await api
+        .delete(COMMENT_URL+`/${commentsInDb[0].id}`)
+        .expect(401)
+      })
+
+      it('should return 404 if  comment is not found',async()=>{
+   // arrange
+
+        const error_message = "Comment Does Not Exist"
+
+        const non_existant_id= await helper.nonExistingId()
+
+       const token = helper.someUserInfo.token
+
+        //act 
+        const result=  await api
+        .delete(COMMENT_URL+`/${non_existant_id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(404)
+        
+        //assert
+       expect(result.body.error).toBe(error_message)
+
+      })
+
+    
+
+      it('should not delete comment if unauthorized user',async()=>{
+      
+      // arrange
+        const commentsInDb = await getCommentsInDb()
+        const error_message = "User Not Authorized To Perform The Operation"
+      
+       const token = helper.otherUserInfo.token
+
+        //act 
+        const result=  await api
+        .delete(COMMENT_URL+`/${commentsInDb[1].id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(404)
+        
+        //assert
+       expect(result.body.error).toBe(error_message)
+      })
+
+
+
+      it('should delete if user is authorized , and should reduce the count of comments in the associated post by 1',async()=>{
+         
+       // arrange
+        const commentsInDbBefore = await getCommentsInDb()
+        const postCountCommentBefore = (await getPostsInDb())[0].comments
+        const token = helper.someUserInfo.token
+
+        //act 
+         await api
+        .delete(COMMENT_URL+`/${commentsInDbBefore[0].id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200)
+        
+        //assert
+        
+        const commentsInDbAfter = await getCommentsInDb()
+
+         const postCountCommentAfter = (await getPostsInDb())[0].comments
+
+        expect(commentsInDbAfter.length).toBe(commentsInDbBefore.length-1)
+
+        const commentContents = commentsInDbAfter.map(c => c.content)
+
+        expect(commentContents).not.toContain(commentsInDbBefore[0].content)
+
+        expect(postCountCommentAfter).toBe(postCountCommentBefore-1)
+
+
+      })
+
+
+    
+  })
+  
+  
   
 });
