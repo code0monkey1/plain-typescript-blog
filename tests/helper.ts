@@ -51,7 +51,6 @@ export const initialPosts:Omit<Post,'id'|'comments'|'createdAt'|'updatedAt'> []=
        return comments.map( (c:any) => c.toJSON())
   }
 
-
   const otherUserInfo={
 
        user:{
