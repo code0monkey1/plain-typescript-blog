@@ -21,10 +21,9 @@ import { mapCollection } from "./utils";
 
        const comment = await commentService.create({...req.body,userId:req.userId})
   
-       res.json({id:comment.id})
+       res.status(201).json({id:comment.id})
 
 }
-
 
 
 const  deleteComment = async (req: Request, res: Response) => {

@@ -1,13 +1,9 @@
 import mongoose from 'mongoose';
 import supertest from 'supertest';
 import app from '../../src/app';
-import CommentModel from "../../src/main/comment/comment-model";
-import { Comment } from "../../src/main/comment/comment-types";
-import PostModel from "../../src/main/post/post-model";
-import helper, { getCommentsInDb, getPostsInDb } from "../helper";
+import helper from "../helper";
 
 const api = supertest(app);
-
 
 describe('COMMENT', () => {
 
@@ -20,41 +16,47 @@ describe('COMMENT', () => {
 
   beforeEach(async () => {
      
-    await initializePosts()
-    await CommentModel.deleteMany({});
+    await helper.initializeComments()
 
-    const postId = (await getPostsInDb())[0].id;
+
+    const postId = (await helper.getPostsInDb())[0].id;
     
-    await createCommentsUsingPostIdAndUserId(helper.someUserInfo.userId,postId)
+    await helper.createCommentsUsingPostIdAndUserId(helper.someUserInfo.userId,postId)
 
   });
   describe('create-comment', () => {
    it("should create a new comment when comment body is valid", async () => {
      
-     const posts = await getPostsInDb();
-     const postId = posts[0].id
+     const {postId,token} = await helper.getPostIdAndAutToken()
 
-     const result=await api
-        .get(COMMENT_URL+`/${postId}`)
-        .expect(200)
+     const commentsInDbBefore = await helper.getCommentsInDb()
+     
+     const new_comment={
+       content:"some_content",
+       postId
+     }
+
+      await api
+        .post(COMMENT_URL)
+        .send(new_comment)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201)
         .expect('Content-Type', /application\/json/);
      
-      const retrievedContent = result.body.data.map( (d:any) => d.content)
-
-      expect(retrievedContent).toContain(helper.initialComments[0].content)
+     await helper.assertCommentAdded(commentsInDbBefore,new_comment.content)
       
     });
 
     it("should return validation error when comment body is invalid", async () => {
      
      const userId =helper.someUserInfo.userId
-     const postId = (await getPostsInDb())[0].id
-     const token = helper.someUserInfo.token
-   
 
+     const {postId,token}=await helper.getPostIdAndAutToken()
+   
      const error_message="Expected string, received number"
   
-     const commentsInDb = await getCommentsInDb()
+     const commentsInDbBefore = await helper.getCommentsInDb()
+
         const comment=  {
         content:1,
         userId,
@@ -67,21 +69,21 @@ describe('COMMENT', () => {
         .set('Authorization', `Bearer ${token}`)
         .expect(400)
 
-      const commentsInDAfter = await getCommentsInDb()
+      const commentsInDbAfter = await helper.getCommentsInDb()
       
          //assert
        expect(JSON.parse(result.body.error)[0].content).toBe(error_message)
        
-       expect(commentsInDb.length).toBe(commentsInDAfter.length)
+       expect(commentsInDbBefore.length).toBe(commentsInDbAfter.length)
       
     });
 
     it("should return 401 error when JWT not provided",async()=>{
     
-      const posts = await getPostsInDb();
+      const posts = await helper.getPostsInDb();
       const userId = helper.someUserInfo.userId;;
 
-      const comment: Omit<Comment, 'id'> = {
+      const comment = {
         postId: posts[0].id,
         content: 'myContent',
         userId
@@ -100,21 +102,17 @@ describe('COMMENT', () => {
 
     it('should retrieve all the stored comments',async()=>{
 
-      const posts = await getPostsInDb();
+      const posts = await helper.getPostsInDb();
       const postId= await posts[0].id
 
-      const commentsInDb = await getCommentsInDb()
-
-      const result= await api
+      await api
         .get(COMMENT_URL+`/${postId}`)
         .expect(200)
-    
-      const commentContents = result.body.data.map( (c:any )=> c.content)
-
-      expect(commentContents.length).toBe(commentsInDb.length)
      
-      expect(commentContents).toContain(helper.initialComments[0].content)
-           
+     const initialCommentsContents =helper.initialComments.map(c => c.content)
+
+     await  helper.assertContentsAreInCommentsDb(initialCommentsContents)
+  
     })
 
     it('should return a 401 with `malformatted id` in case the commentId is invalid',async()=>{
@@ -133,7 +131,7 @@ describe('COMMENT', () => {
 
     it('should return no comments for a userId , which did not create any',async()=>{
 
-       const postsInDb = await getPostsInDb()
+       const postsInDb = await helper.getPostsInDb()
 
        const result = await api
         .get(COMMENT_URL+`/${postsInDb[1].id}`)
@@ -150,7 +148,7 @@ describe('COMMENT', () => {
     it('should return validation-error , when the comment update body is invalid',async()=>{
       
         // arrange
-        const commentsInDb = await getCommentsInDb()
+        const commentsInDb = await helper.getCommentsInDb()
         const error_message ='Expected string, received boolean'
         
        const comment_to_update = {
@@ -172,7 +170,7 @@ describe('COMMENT', () => {
 
     it('should update when right credentials and comment body formats are provided',async()=>{
         // arrange
-        const commentsInDb = await getCommentsInDb()
+        const commentsInDb = await helper.getCommentsInDb()
         
        const comment_to_update = {
            content:'updated_comment'
@@ -193,7 +191,7 @@ describe('COMMENT', () => {
 
     it('should not update when user is unauthorized',async()=>{
      // arrange
-        const commentsInDb = await getCommentsInDb()
+        const commentsInDb = await helper.getCommentsInDb()
         const error_message = "User Not Authorized To Perform The Operation"
        const comment_to_update = {
            content:'updated_comment'
@@ -257,7 +255,7 @@ describe('COMMENT', () => {
         it('should return 401 if token is not provided',async()=>{
        
         // arrange
-         const commentsInDb = await getCommentsInDb()
+         const commentsInDb = await helper.getCommentsInDb()
           
         // act 
 
@@ -271,7 +269,7 @@ describe('COMMENT', () => {
       it('should return 401 if token is not provided',async()=>{
        
         // arrange
-         const commentsInDb = await getCommentsInDb()
+         const commentsInDb = await helper.getCommentsInDb()
           
         // act 
 
@@ -306,7 +304,7 @@ describe('COMMENT', () => {
       it('should not delete comment if unauthorized user',async()=>{
       
       // arrange
-        const commentsInDb = await getCommentsInDb()
+        const commentsInDb = await helper.getCommentsInDb()
         const error_message = "User Not Authorized To Perform The Operation"
       
        const token = helper.otherUserInfo.token
@@ -326,51 +324,28 @@ describe('COMMENT', () => {
       it('should delete if user is authorized , and should reduce the count of comments in the associated post by 1',async()=>{
          
        // arrange
-        const commentsInDbBefore = await getCommentsInDb()
-        const postCountCommentBefore = (await getPostsInDb())[0].comments
+        const commentsInDbBefore = await helper.getCommentsInDb()
         const token = helper.someUserInfo.token
+        const parentPostBefore = (await helper.getPostsInDb())[0]
+        const commentBeingDeleted=commentsInDbBefore[0]
 
         //act 
          await api
-        .delete(COMMENT_URL+`/${commentsInDbBefore[0].id}`)
+        .delete(COMMENT_URL+`/${commentBeingDeleted.id}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200)
         
         //assert
+
+        await helper.assertCommentWasDeleted(commentsInDbBefore,commentBeingDeleted)
         
-        const commentsInDbAfter = await getCommentsInDb()
-
-         const postCountCommentAfter = (await getPostsInDb())[0].comments
-
-        expect(commentsInDbAfter.length).toBe(commentsInDbBefore.length-1)
-
-        const commentContents = commentsInDbAfter.map(c => c.content)
-
-        expect(commentContents).not.toContain(commentsInDbBefore[0].content)
-
-        expect(postCountCommentAfter).toBe(postCountCommentBefore-1)
-
+        await helper.assertPostCommentsCountWasReducedByOne(parentPostBefore)
+       
 
       })
-
 
     
   })
   
-   const createCommentsUsingPostIdAndUserId=async(userId:string,postId:string)=>{
-
-      let result = helper.initialComments.map( c => new CommentModel({...c,userId,postId})).map(c => c.save())
-      
-      await Promise.all( result)
-
-      return result
-
-   }
-
-   const initializePosts=async()=>{
-    await PostModel.deleteMany({});
-    await PostModel.insertMany(helper.initialPosts.slice(0,2));
-   }
-
   
 });

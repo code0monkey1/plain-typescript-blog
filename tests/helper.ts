@@ -3,8 +3,7 @@ import { Comment } from "../src/main/comment/comment-types";
 import PostModel from "../src/main/post/post-model";
 import { Post } from "../src/main/post/post-types";
 
-
- export const initialPosts:Omit<Post,'id'|'comments'|'createdAt'|'updatedAt'> []=[
+export const initialPosts:Omit<Post,'id'|'comments'|'createdAt'|'updatedAt'> []=[
     {
       body:"a",
       subject:"s1",
@@ -21,7 +20,6 @@ import { Post } from "../src/main/post/post-types";
        userId:"65e587aa491c70c47fae49d1",
     }
   ]
-
 
 
   const someUserInfo={
@@ -97,12 +95,97 @@ const initialComments:Omit<Comment,'id'|'postId'>[]=[
   export const getInvalidToken=()=>"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWU1ODAyMTEwNmM5OTM0ZWE2MjUwMjMiLCJ1c2VybmFtZSI6InNrZCIsImlhdCI6MTcwOTUzOTM2N30.sdsXf_CgGzozF1VrwNXWXjE96mEFIkN_UmdC3ApKfk"
 
 
+   export const createCommentsUsingPostIdAndUserId=async(userId:string,postId:string)=>{
+
+      let result = initialComments.map( c => new CommentModel({...c,userId,postId})).map(c => c.save())
+      
+      await Promise.all( result)
+
+      return result
+
+   }
+
+   export const initializeComments=async()=>{
+    await PostModel.deleteMany({});
+    await PostModel.insertMany(initialPosts.slice(0,2));
+
+
+    await CommentModel.deleteMany({});
+   }
+
+   export const assertCommentAdded=async(commentsInDbBefore:any[],newCommentContent:string)=>{
+       
+     const commentsInDbAfter = await getCommentsInDb()
+
+      expect(commentsInDbAfter.length).toBe(commentsInDbBefore.length+1)
+     
+      expect(commentsInDbAfter.map( c => c.content)).toContain(newCommentContent)
+    
+   }
+
+   export const assertCommentWasDeleted=async(commentsInDbBefore:any[], commentBeingDeleted:Comment)=>{
+   
+         const commentsInDbAfter = await getCommentsInDb()
+
+         const postCountCommentAfter = (await getPostsInDb())[0].comments
+
+        expect(commentsInDbAfter.length).toBe(commentsInDbBefore.length-1)
+
+        const commentContents = commentsInDbAfter.map(c => c.content)
+
+        expect(commentContents).not.toContain(commentBeingDeleted.content)
+
+   }
+
+   export const assertPostCommentsCountWasReducedByOne=async(parentPost:Post)=>{
+
+        const commentsCountBefore = parentPost.comments
+      
+        const {comments:commentsCountAfter} = (await PostModel.findById(parentPost.id))
+
+        expect(commentsCountAfter).toBe(commentsCountBefore-1)
+   }
+
+  export  const getPostIdAndAutToken=async()=>{
+
+     const posts = await getPostsInDb();
+     const postId = posts[0].id
+     const token = someUserInfo.token
+
+     return {postId,token}
+
+   }
+
+   export const assertContentIsInCommentsDb =async(content:string)=>{
+         
+         const contentsDbEntries = await CommentModel.find({})
+
+         expect(contentsDbEntries.map( c => c.content)).toContain(content)
+   }
+
+  export const assertContentsAreInCommentsDb=async(contents:string[])=>{
+       
+   await Promise.all(contents.map(content => assertContentIsInCommentsDb(content)));
+
+    const contentsDbEntries = await CommentModel.find({})
+    
+    expect(initialComments.length).toBe(contentsDbEntries.length)
+
+  }
   export default {
     initialPosts,
     getInvalidToken,
     someUserInfo,
     otherUserInfo,
     getPostsInDb,
+    getCommentsInDb,
     nonExistingId,
-    initialComments
+    initialComments,
+    assertCommentAdded, 
+    assertCommentWasDeleted,
+    assertContentsAreInCommentsDb, 
+    assertPostCommentsCountWasReducedByOne,
+    createCommentsUsingPostIdAndUserId,
+    getPostIdAndAutToken,
+    initializeComments
   }
