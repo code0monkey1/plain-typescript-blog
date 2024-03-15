@@ -1,9 +1,9 @@
-import cors from 'cors'
-import express from 'express'
-const server = express()
+import cors from "cors";
+import express from "express";
+const server = express();
 
 //middleware
-server.use(express.json())
-server.use(cors())
+server.use(express.json());
+server.use(cors());
 
-export default server
+export default server;

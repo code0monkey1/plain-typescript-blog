@@ -280,7 +280,7 @@ describe('COMMENT', () => {
       })
 
       it('should return 404 if  comment is not found',async()=>{
-   // arrange
+       // arrange
 
         const error_message = "Comment Does Not Exist"
 
