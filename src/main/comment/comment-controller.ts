@@ -9,99 +9,82 @@ import { ZCommentSchema, ZUpdateCommentSchema } from "./comment-validators";
 import { CommentNotFoundError } from "./errors/CommentNotFoundError";
 import { mapCollection } from "./utils";
 
+const createComment = async (req: Request, res: Response) => {
+  try {
+    ZCommentSchema.parse(req.body);
+  } catch (e) {
+    throw new ValidationError(new ZodErrorCapturer().getErrors(e));
+  }
 
- const createComment =async(req:Request,res:Response)=>{
-      
-       try{
-           ZCommentSchema.parse(req.body)
-           
-      }catch(e){
-         throw new ValidationError( new ZodErrorCapturer().getErrors(e))
-      }
+  const comment = await commentService.create({
+    ...req.body,
+    userId: req.userId,
+  });
 
-       const comment = await commentService.create({...req.body,userId:req.userId})
-  
-       res.status(201).json({id:comment.id})
-
-}
-
-
-const  deleteComment = async (req: Request, res: Response) => {
-        
-  
-                const id = req.params.id;
-
-                const comment = await commentService.getOne(req.params.id)
-        
-                if(!comment)  throw new CommentNotFoundError()
-
-        
-                if(!(comment.userId.toString()===req.userId))
-                      throw  new UnauthorizedUserError()
-
-           
-                await commentService.deleteComment(id);
-                
-                res.json({ message: "Comment deleted successfully" });
-    
+  res.status(201).json({ id: comment.id });
 };
 
+const deleteComment = async (req: Request, res: Response) => {
+  const id = req.params.id;
 
- const getLatestCommentsByPostId = async(req:Request,res:Response)=>{
-           
-            const {postId}= req.params
-            
-            const { page = 1 } = req.query;
-               
-             const {  paginationLimit } = paginationConfig
-                  // Paginate comments for a specific post
-      
-            const options = {
-                        page: page,
-                        limit: paginationLimit,
-                        sort: { createdAt: -1 }, // Sort comments by createdAt date in descending order
-                        };
- 
-            let result= await CommentModel.paginate({ postId }, options)!;
+  const comment = await commentService.getOne(req.params.id);
 
-            result.data = mapCollection(result.docs)
+  if (!comment) throw new CommentNotFoundError();
 
-           //delete the docs array
-            delete result.docs;
-            
-            res.json(result)
-      }
+  if (!(comment.userId.toString() === req.userId))
+    throw new UnauthorizedUserError();
 
+  await commentService.deleteComment(id);
 
-const updateComment=async(req:Request,res:Response)=>{
-       
+  res.json({ message: "Comment deleted successfully" });
+};
 
-            try{
-                  ZUpdateCommentSchema.parse(req.body)
-                  
-            }catch(e){
-                
-               throw new ValidationError( new ZodErrorCapturer().getErrors(e))
-            }
+const getLatestCommentsByPostId = async (req: Request, res: Response) => {
+  const { postId } = req.params;
 
+  const { page = 1 } = req.query;
 
-            const comment = await commentService.getOne(req.params.id)
-        
-            if(!comment) throw new CommentNotFoundError()
+  const { paginationLimit } = paginationConfig;
+  // Paginate comments for a specific post
 
-            if(!(comment.userId.toString()===req.userId))
-                        throw  new UnauthorizedUserError()
+  const options = {
+    page: page,
+    limit: paginationLimit,
+    sort: { createdAt: -1 }, // Sort comments by createdAt date in descending order
+  };
 
-           const updatedComment= await commentService.patch(req.params.id,req.body)
+  let result = await CommentModel.paginate({ postId }, options)!;
 
-            res.json(updatedComment)
-            
-  
-}
+  result.data = mapCollection(result.docs);
 
-export default { 
- createComment,
- getLatestCommentsByPostId,
- deleteComment,
- updateComment
-}
+  //delete the docs array
+  delete result.docs;
+
+  res.json(result);
+};
+
+const updateComment = async (req: Request, res: Response) => {
+  try {
+    ZUpdateCommentSchema.parse(req.body);
+  } catch (e) {
+    throw new ValidationError(new ZodErrorCapturer().getErrors(e));
+  }
+
+  const comment = await commentService.getOne(req.params.id);
+
+  if (!comment) throw new CommentNotFoundError();
+
+  if (!(comment.userId.toString() === req.userId))
+    throw new UnauthorizedUserError();
+
+  const updatedComment = await commentService.patch(req.params.id, req.body);
+
+  res.json(updatedComment);
+};
+
+export default {
+  createComment,
+  getLatestCommentsByPostId,
+  deleteComment,
+  updateComment,
+};
